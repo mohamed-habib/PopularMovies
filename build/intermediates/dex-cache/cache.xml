@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\Dell\Downloads\Udacity Course\PopularMovies\app\build\intermediates\exploded-aar\com.android.support\support-v4\22.2.1\jars\libs\internal_impl-22.2.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="c471eaaba13ff64f6e0383d1c30a9cdc9a97efeb">
+        <dex dex="C:\Users\Dell\Downloads\Udacity Course\PopularMovies\app\build\intermediates\pre-dexed\release\internal_impl-22.2.1-dbcd4bb4cc55c0286d530a7b7e95cdf2dda81375.jar" />
+    </item>
+    <item
+        jar="C:\Users\Dell\.gradle\caches\modules-2\files-2.1\com.squareup.picasso\picasso\2.5.2\7446d06ec8d4f7ffcc53f1da37c95f200dcb9387\picasso-2.5.2.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="7446d06ec8d4f7ffcc53f1da37c95f200dcb9387">
+        <dex dex="C:\Users\Dell\Downloads\Udacity Course\PopularMovies\app\build\intermediates\pre-dexed\release\picasso-2.5.2-9271b65524836d81588e5e03e18cbebe4ce4e0a7.jar" />
+    </item>
+    <item
+        jar="F:\Programming\Android\Programs\sdk\extras\android\m2repository\com\android\support\support-annotations\22.2.1\support-annotations-22.2.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="61a0ff5c29295ec56d7e0bd3d25d95dbf71b4b2b">
+        <dex dex="C:\Users\Dell\Downloads\Udacity Course\PopularMovies\app\build\intermediates\pre-dexed\release\support-annotations-22.2.1-06f86f07ce86c4a0f9a926c8794ac5a83704d9ca.jar" />
+    </item>
+    <item
+        jar="C:\Users\Dell\Downloads\Udacity Course\PopularMovies\app\build\intermediates\exploded-aar\com.android.support\support-v4\22.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="f8efd0096475e0daf054267b61544e10dc776503">
+        <dex dex="C:\Users\Dell\Downloads\Udacity Course\PopularMovies\app\build\intermediates\pre-dexed\release\classes-2c57f20543ce179d5347fa2abde5f0323b3d7095.jar" />
+    </item>
+    <item
+        jar="C:\Users\Dell\Downloads\Udacity Course\PopularMovies\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\22.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="4486e953d1f35f8ccab098b1dd67146366d5f731">
+        <dex dex="C:\Users\Dell\Downloads\Udacity Course\PopularMovies\app\build\intermediates\pre-dexed\release\classes-b95564a61c4088d3df61a5e02da27c4665f1bab8.jar" />
+    </item>
+
+</items>
