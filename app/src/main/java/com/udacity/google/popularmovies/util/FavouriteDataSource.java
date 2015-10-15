@@ -5,6 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
+import android.view.View;
+import android.widget.Toast;
+
+import com.udacity.google.popularmovies.MainActivity;
 
 import java.util.ArrayList;
 
@@ -15,7 +20,7 @@ public class FavouriteDataSource {
 
 
     SQLiteOpenHelper openHelper;
-    SQLiteDatabase database;
+    public static SQLiteDatabase database;
 
    public FavouriteDataSource(Context context){
         openHelper = new FavouriteOpenHelper(context);
@@ -41,9 +46,11 @@ public class FavouriteDataSource {
         contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_TITLE, movie.getTitle());
         contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_VOTE_AVERAGE, movie.getVoteAverage());
 
+        ContentValues values = new ContentValues();
+        values.put(FavouriteContract.FavouriteEntry.COLUMN_MOVIE_ID, "1");
+
 
         database.insert(FavouriteOpenHelper.TABLE_FAVOURITE, null, contentValues);
-
 
     }
 
@@ -52,7 +59,6 @@ public class FavouriteDataSource {
 
         database.delete(FavouriteOpenHelper.TABLE_FAVOURITE, whereClause, null);
     }
-
 
     public ArrayList<Movie> getFavouriteMovies(){
 

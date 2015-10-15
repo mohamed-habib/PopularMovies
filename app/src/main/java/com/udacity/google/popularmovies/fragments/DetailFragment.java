@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.support.v7.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -38,25 +40,32 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * Created by Dell on 10/4/2015.
  */
 public class DetailFragment extends Fragment {
 
-int clickedMovieId ;
+    int clickedMovieId;
     ListView reviewsLV;
     ListView trailersLv;
     RequestQueue queue;
-    ArrayList<String> trailersNames ;
-    ArrayList<String> trailersKeys ;
+    ArrayList<String> trailersNames;
+    ArrayList<String> trailersKeys;
+    private ShareActionProvider mShareActionProvider;
+    Intent shareIntent;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-      View rootView = inflater.inflate(R.layout.detail_fragment,null,false);
+        View rootView = inflater.inflate(R.layout.detail_fragment, null, false);
 
+//
+//        Scanner sc = new Scanner(System.in);
+//        String s ;
+//        System.out.println();
 
         final ToggleButton favButton = (ToggleButton) rootView.findViewById(R.id.FavtoggleButton);
         //MainFragment.clickedMovie
@@ -70,7 +79,6 @@ int clickedMovieId ;
         Picasso.with(getActivity()).load(MainFragment.clickedMovie.getPosterPath()).resize(300, 300).centerInside().into(moviePoster);
 
 
-
         Log.d("DetailDebug", MainFragment.clickedMovie.getPosterPath());
 
         TextView movieDate = (TextView) rootView.findViewById(R.id.movie_date);
@@ -80,7 +88,7 @@ int clickedMovieId ;
         movieVoteAverage.setText(MainFragment.clickedMovie.getVoteAverage());
 
 
-        TextView movieOverView= (TextView) rootView.findViewById(R.id.movie_overview);
+        TextView movieOverView = (TextView) rootView.findViewById(R.id.movie_overview);
         movieOverView.setText(MainFragment.clickedMovie.getOverview());
 
 
@@ -119,13 +127,11 @@ int clickedMovieId ;
         });
 
 
-
-
         queue = Volley.newRequestQueue(getActivity());
 
 
         trailersNames = new ArrayList<String>();
-         trailersKeys = new ArrayList<String>();
+        trailersKeys = new ArrayList<String>();
 
         Uri.Builder builder = new Uri.Builder();
 
@@ -133,12 +139,12 @@ int clickedMovieId ;
                 .authority("api.themoviedb.org")
                 .appendPath("3")
                 .appendPath("movie")
-                .appendPath(""+clickedMovieId)
+                .appendPath("" + clickedMovieId)
                 .appendPath("videos")
                 .appendQueryParameter("api_key", getActivity().getResources().getString(R.string.api_key));
 
 //http://api.themoviedb.org/3/movie/49026/videos?api_key=4f92be250f018aff8f3a2b5c3864aecd
-    String myUrl = builder.build().toString();
+        String myUrl = builder.build().toString();
 
         Log.d("VolleyDebug", myUrl);
         JsonObjectRequest trailersRequest = new JsonObjectRequest(Request.Method.GET, myUrl, null, new Response.Listener<JSONObject>() {
@@ -151,8 +157,7 @@ int clickedMovieId ;
                     resultJsonArray = response.getJSONArray("results");
 
 
-
-                    for (int i =0; i<resultJsonArray.length(); i++){
+                    for (int i = 0; i < resultJsonArray.length(); i++) {
 
                         JSONObject jsonObject = resultJsonArray.getJSONObject(i);
 
@@ -172,17 +177,16 @@ int clickedMovieId ;
                 }
             }
         },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Sorry some thing happened while retrieving trailers, please try again", Toast.LENGTH_LONG).show();
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getActivity(), "Sorry some thing happened while retrieving trailers, please try again", Toast.LENGTH_LONG).show();
 
+                    }
                 }
-            }
         );
 
         queue.add(trailersRequest);
-
 
 
         trailersLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -192,7 +196,6 @@ int clickedMovieId ;
                 String clickedKey = trailersKeys.get(i);
 
                 String url = "https://www.youtube.com/watch?v=" + clickedKey;
-
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
                 startActivity(intent);
@@ -212,7 +215,7 @@ int clickedMovieId ;
                 .authority("api.themoviedb.org")
                 .appendPath("3")
                 .appendPath("movie")
-                .appendPath(""+clickedMovieId)
+                .appendPath("" + clickedMovieId)
                 .appendPath("reviews")
                 .appendQueryParameter("api_key", getActivity().getResources().getString(R.string.api_key));
 
@@ -229,16 +232,16 @@ int clickedMovieId ;
                     JSONArray resultsJsonArray = response.getJSONArray("results");
 
 
-                    for (int i=0; i < resultsJsonArray.length(); i++){
+                    for (int i = 0; i < resultsJsonArray.length(); i++) {
 
-                        JSONObject resultJsonObj =  resultsJsonArray.getJSONObject(i);
+                        JSONObject resultJsonObj = resultsJsonArray.getJSONObject(i);
 
                         String author = resultJsonObj.getString("author");
 
                         String content = resultJsonObj.getString("content");
 
                         //TODO: author with content !
-                        reviewsArrayList.add(author+": " + System.getProperty("line.separator") + content);
+                        reviewsArrayList.add(author + ": " + System.getProperty("line.separator") + System.getProperty("line.separator") + content);
 
                         Log.d("DetailDebug", author + ": /r/n" + content);
 
@@ -263,7 +266,6 @@ int clickedMovieId ;
         queue.add(reviewsRequest);
 
 
-
         reviewsLV.setOnTouchListener(new View.OnTouchListener() {
             // Setting on Touch Listener for handling the touch inside ScrollView
             @Override
@@ -277,12 +279,10 @@ int clickedMovieId ;
 
         FavouriteDataSource favouriteDataSource = new FavouriteDataSource(getActivity());
         favouriteDataSource.open();
-        if(favouriteDataSource.isFavouriteMovie(clickedMovieId)){
+        if (favouriteDataSource.isFavouriteMovie(clickedMovieId)) {
 
             favButton.setText("FAVOURITE");
         }
-
-
 
 
         return rootView;
@@ -294,7 +294,8 @@ int clickedMovieId ;
         Activity context;
 
         ArrayList<String> stringArrayList;
-        public CustomListAdapter(Activity context,  ArrayList<String> resources) {
+
+        public CustomListAdapter(Activity context, ArrayList<String> resources) {
             super(context, R.layout.grid_view_item);
 
             stringArrayList = resources;
@@ -307,7 +308,9 @@ int clickedMovieId ;
         }
 
         @Override
-        public Object getItem(int position) { return stringArrayList.get(position);}
+        public Object getItem(int position) {
+            return stringArrayList.get(position);
+        }
 
         @Override
         public long getItemId(int position) {
@@ -343,14 +346,34 @@ int clickedMovieId ;
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
-        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_detail, menu);
+
+
+
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
+       if(item.getItemId() == R.id.menu_item_share) {
+           mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
 
+           if (trailersKeys != null && trailersKeys.size() > 0) {
+               String url = "https://www.youtube.com/watch?v=" + trailersKeys.get(0);
+
+               shareIntent = new Intent(android.content.Intent.ACTION_SEND);
+               shareIntent.setType("text/plain");
+               shareIntent.putExtra(Intent.EXTRA_STREAM, url);
+               shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+           }
+           if (mShareActionProvider != null) {
+               mShareActionProvider.setShareIntent(shareIntent);
+           }
+       }
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }

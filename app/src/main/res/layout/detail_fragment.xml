@@ -59,14 +59,16 @@
             android:layout_toRightOf="@id/movie_poster"
             android:gravity="start"
             android:layout_marginLeft="20dp"
+            android:layout_alignParentRight="true"
             >
                 <TextView
                     android:id="@+id/movie_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=""
-                    android:textSize="20sp"
+                    android:text="Hi"
+                    android:textSize="16sp"
                     android:layout_marginBottom="5dp"
+                    android:layout_gravity="center"
                     />
 
 
@@ -75,34 +77,25 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text=""
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:layout_marginBottom="5dp"
+                    android:layout_gravity="center"
                     />
 
-
-            <TextView
-                android:id="@+id/movie_duration"
+            <ToggleButton
+                android:id="@+id/FavtoggleButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="20sp"/>
+                android:textOn="FAVOURITE"
+                android:textOff="MARK AS A FAVOURITE"
+                android:layout_gravity="center"
+                android:background="@android:color/holo_blue_bright"
+                android:padding="5dp"
 
+                />
 
         </LinearLayout>
 
-        <ToggleButton
-            android:id="@+id/FavtoggleButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:textOn="FAVOURITE"
-            android:textOff="MARK AS A FAVOURITE"
-            android:layout_alignParentBottom="true"
-            android:layout_toRightOf="@+id/movie_poster"
-            android:layout_toEndOf="@+id/text_layout"
-            android:background="@android:color/holo_blue_bright"
-            android:padding="5dp"
-            />
 
 
     </RelativeLayout>

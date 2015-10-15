@@ -1,11 +1,14 @@
 package com.udacity.google.popularmovies.fragments;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,8 +34,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.udacity.google.popularmovies.DetailActivity;
+import com.udacity.google.popularmovies.util.FavouriteContract;
 import com.udacity.google.popularmovies.util.FavouriteDataSource;
 import com.udacity.google.popularmovies.util.CustomGridAdapter;
+import com.udacity.google.popularmovies.util.FavouriteOpenHelper;
+import com.udacity.google.popularmovies.util.FavouriteProvider;
 import com.udacity.google.popularmovies.util.Movie;
 import com.udacity.google.popularmovies.R;
 
@@ -40,6 +47,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.prefs.PreferenceChangeEvent;
 
 /**
  * Created by Dell on 9/29/2015.
@@ -59,11 +67,15 @@ public class MainFragment extends Fragment {
 
     String POP_DESC = "popularity.desc";
     String VOTE_DSEC= "vote_average.desc";
+    String FAV = "favourite";
 
     String API_KEY = null;
 
     String TAG = "VolleyDebug";
 
+    String sort_by = POP_DESC;
+    CustomGridAdapter adapter ;
+    SharedPreferences sp;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,94 +83,21 @@ public class MainFragment extends Fragment {
         rootView = inflater.inflate(R.layout.main_fragment, container, false);
         API_KEY = getActivity().getResources().getString(R.string.api_key);
 
-
         gridView = (GridView) rootView.findViewById(R.id.gridView);
 
+        queue = Volley.newRequestQueue(getActivity());
+
+        sp = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
 
 
-//        if(isConnectingToInternet()){
+        sort_by = sp.getString("sort_by",POP_DESC);
 
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme("http")
-                .authority("api.themoviedb.org")
-                .appendPath("3")
-                .appendPath("discover")
-                .appendPath("movie")
-                .appendQueryParameter("sort_by", POP_DESC)
-                .appendQueryParameter("api_key", API_KEY);
+        if(sort_by.equals(FAV))
+            getFavouriteFromDB();
+        else {
+            jsonObjectRequest(sort_by);
 
-// http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=4f92be250f018aff8f3a2b5c3864aecd
-
-        String myUrl = builder.build().toString();
-
-        Log.d("popularMovies", myUrl);
-
- queue = Volley.newRequestQueue(getActivity());
-
-        popularMoviePosters = new ArrayList<String>();
-        popularMovies = new ArrayList<Movie>();
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, myUrl, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-
-                            JSONArray jsonArrayResult = response.getJSONArray("results");
-
-                            for (int i = 0; i < jsonArrayResult.length(); i++) {
-                                Movie movie = new Movie();
-
-
-                                JSONObject jsonObjectMovie = jsonArrayResult.getJSONObject(i);
-
-                                movie.setId(jsonObjectMovie.getInt("id"));
-                                movie.setOverview(jsonObjectMovie.getString("overview"));
-                                movie.setPosterPath("https://image.tmdb.org/t/p/w185/"+jsonObjectMovie.getString("poster_path"));
-                                movie.setReleaseDate(jsonObjectMovie.getString("release_date"));
-                                movie.setTitle(jsonObjectMovie.getString("title"));
-                                movie.setVoteAverage(jsonObjectMovie.getString("vote_average"));
-                                popularMovies.add(movie);
-
-                                poster = "https://image.tmdb.org/t/p/w185/";
-                                poster += jsonObjectMovie.getString("poster_path");
-                                popularMoviePosters.add(poster);
-                                Log.d(TAG, popularMoviePosters.get(i));
-                            }
-
-                            //TODO: remove this to out
-
-                            CustomGridAdapter adapter = new CustomGridAdapter(getActivity(), popularMovies);
-
-                            gridView.setAdapter(adapter);
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-
-
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                        Toast.makeText(getActivity(), "Sorry some thing happened while retrieving data, please try again", Toast.LENGTH_LONG).show();
-                        Log.e(TAG, error.getMessage());
-                    }
-                });
-
-        queue.add(jsonObjectRequest);
-
-
-
-
-
-//    }else{
-//
-//            Toast.makeText(getActivity(),"No Internet Connection, please connect to the internet then try again", Toast.LENGTH_LONG).show();
-//        }
-//
-
+        }
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -193,30 +132,85 @@ public class MainFragment extends Fragment {
             return rootView;
     }
 
+    private void jsonObjectRequest(String sort_by) {
+
+
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("http")
+                .authority("api.themoviedb.org")
+                .appendPath("3")
+                .appendPath("discover")
+                .appendPath("movie")
+                .appendQueryParameter("sort_by", sort_by)
+                .appendQueryParameter("api_key", API_KEY);
+
+// http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=4f92be250f018aff8f3a2b5c3864aecd
+
+        String myUrl = builder.build().toString();
+
+        Log.d("popularMovies", myUrl);
+
+        //TODO:
+
+        popularMoviePosters = new ArrayList<String>();
+        popularMovies = new ArrayList<Movie>();
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, myUrl, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+
+                            JSONArray jsonArrayResult = response.getJSONArray("results");
+
+                            for (int i = 0; i < jsonArrayResult.length(); i++) {
+                                Movie movie = new Movie();
+
+
+                                JSONObject jsonObjectMovie = jsonArrayResult.getJSONObject(i);
+
+                                movie.setId(jsonObjectMovie.getInt("id"));
+                                movie.setOverview(jsonObjectMovie.getString("overview"));
+                                movie.setPosterPath("https://image.tmdb.org/t/p/w185/"+jsonObjectMovie.getString("poster_path"));
+                                movie.setReleaseDate(jsonObjectMovie.getString("release_date"));
+                                movie.setTitle(jsonObjectMovie.getString("title"));
+                                movie.setVoteAverage(jsonObjectMovie.getString("vote_average"));
+                                popularMovies.add(movie);
+
+                                poster = "https://image.tmdb.org/t/p/w185/";
+                                poster += jsonObjectMovie.getString("poster_path");
+                                popularMoviePosters.add(poster);
+                                Log.d(TAG, popularMoviePosters.get(i));
+                            }
+
+
+                            adapter = new CustomGridAdapter(getActivity(), popularMovies);
+
+                            gridView.setAdapter(adapter);
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        Toast.makeText(getActivity(), "Sorry some thing happened while retrieving data, please try again", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, error.getMessage());
+                    }
+                });
+
+        queue.add(jsonObjectRequest);
+    }
+
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-    }
-
-
-    /**
-     * Checking for all possible internet providers
-     * **/
-    public boolean isConnectingToInternet(){
-        ConnectivityManager connectivity = (ConnectivityManager) getActivity().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivity != null)
-        {
-            NetworkInfo[] info = connectivity.getAllNetworkInfo();
-            if (info != null)
-                for (int i = 0; i < info.length; i++)
-                    if (info[i].getState() == NetworkInfo.State.CONNECTED)
-                    {
-                        return true;
-                    }
-
-        }
-        return false;
     }
 
 
@@ -235,168 +229,53 @@ public class MainFragment extends Fragment {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+
         if(id == R.id.action_most_popular){
-            //TODO: refresh the grid view to show the most popular
 
 
-            Uri.Builder builder = new Uri.Builder();
-            builder.scheme("http")
-                    .authority("api.themoviedb.org")
-                    .appendPath("3")
-                    .appendPath("discover")
-                    .appendPath("movie")
-                    .appendQueryParameter("sort_by", POP_DESC)
-                    .appendQueryParameter("api_key", API_KEY);
-
-// http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=4f92be250f018aff8f3a2b5c3864aecd
-
-            String myUrl = builder.build().toString();
-
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                    (Request.Method.GET, myUrl, null, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-
-                                JSONArray jsonArrayResult = response.getJSONArray("results");
-
-                                for (int i = 0; i < jsonArrayResult.length(); i++) {
-                                    Movie movie = new Movie();
+            sp.edit().putString("sort_by", POP_DESC).commit();
 
 
-                                    JSONObject jsonObjectMovie = jsonArrayResult.getJSONObject(i);
+            jsonObjectRequest(POP_DESC);
 
-                                    movie.setId(jsonObjectMovie.getInt("id"));
-                                    movie.setOverview(jsonObjectMovie.getString("overview"));
-                                    movie.setPosterPath("https://image.tmdb.org/t/p/w185/"+jsonObjectMovie.getString("poster_path"));
-                                    movie.setReleaseDate(jsonObjectMovie.getString("release_date"));
-                                    movie.setTitle(jsonObjectMovie.getString("title"));
-                                    movie.setVoteAverage(jsonObjectMovie.getString("vote_average"));
-                                    popularMovies.add(movie);
-
-                                    poster = "https://image.tmdb.org/t/p/w185/";
-                                    poster += jsonObjectMovie.getString("poster_path");
-                                    popularMoviePosters.add(poster);
-                                    Log.d(TAG, popularMoviePosters.get(i));
-                                }
-                                CustomGridAdapter adapter = new CustomGridAdapter(getActivity(), popularMovies);
-
-                                gridView.setAdapter(adapter);
-
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-
-                            Toast.makeText(getActivity(), "Sorry some thing happened while retrieving data, please try again", Toast.LENGTH_LONG).show();
-                            Log.e(TAG, error.getMessage());
-                        }
-                    });
-            queue.add(jsonObjectRequest);
-
-            //TODO: GridView.setOnClickListener ???
-
-            return true;
+           return true;
         }
         if(id == R.id.action_highest_rated){
 
-            //TODO: refresh the grid view to show the most popular
 
+            sp.edit().putString("sort_by", VOTE_DSEC).commit();
 
-            Uri.Builder builder = new Uri.Builder();
-            builder.scheme("http")
-                    .authority("api.themoviedb.org")
-                    .appendPath("3")
-                    .appendPath("discover")
-                    .appendPath("movie")
-                    .appendQueryParameter("sort_by", VOTE_DSEC)
-                    .appendQueryParameter("api_key", API_KEY);
+            jsonObjectRequest(VOTE_DSEC);
 
-// http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=4f92be250f018aff8f3a2b5c3864aecd
-
-            String myUrl = builder.build().toString();
-
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                    (Request.Method.GET, myUrl, null, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-
-                                JSONArray jsonArrayResult = response.getJSONArray("results");
-
-                                for (int i = 0; i < jsonArrayResult.length(); i++) {
-                                    Movie movie = new Movie();
-
-
-                                    JSONObject jsonObjectMovie = jsonArrayResult.getJSONObject(i);
-
-                                    movie.setId(jsonObjectMovie.getInt("id"));
-                                    movie.setOverview(jsonObjectMovie.getString("overview"));
-                                    movie.setPosterPath("https://image.tmdb.org/t/p/w185/"+jsonObjectMovie.getString("poster_path"));
-                                    movie.setReleaseDate(jsonObjectMovie.getString("release_date"));
-                                    movie.setTitle(jsonObjectMovie.getString("title"));
-                                    movie.setVoteAverage(jsonObjectMovie.getString("vote_average"));
-                                    popularMovies.add(movie);
-
-                                    poster = "https://image.tmdb.org/t/p/w185/";
-                                    poster += jsonObjectMovie.getString("poster_path");
-                                    popularMoviePosters.add(poster);
-                                    Log.d(TAG, popularMoviePosters.get(i));
-                                }
-                                CustomGridAdapter adapter = new CustomGridAdapter(getActivity(), popularMovies);
-
-                                gridView.setAdapter(adapter);
-
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-
-
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-
-                            Toast.makeText(getActivity(), "Sorry some thing happened while retrieving data, please try again", Toast.LENGTH_LONG).show();
-                            Log.e(TAG, error.getMessage());
-                        }
-                    });
-
-
-            queue.add(jsonObjectRequest);
             return true;
         }
         if(id == R.id.action_favourite){
+            sp.edit().putString("sort_by", "favourite").commit();
 
-            //retrieve movies from db and show them on grid view
-
-            FavouriteDataSource dataSource = new FavouriteDataSource(getActivity());
-
-            dataSource.open();
-            ArrayList<Movie> favoriteMovies = dataSource.getFavouriteMovies();
-            dataSource.close();
-
-            if (favoriteMovies.size() == 0){
-                Toast.makeText(getActivity(),"You don't have any favourite movies yet, mark a movie as favourite first", Toast.LENGTH_LONG).show();
-
-            }else{
-
-                CustomGridAdapter adapter = new CustomGridAdapter(getActivity(), favoriteMovies);
-
-                gridView.setAdapter(adapter);
-
-            }
+            getFavouriteFromDB();
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void getFavouriteFromDB() {
+
+        //retrieve movies from db and show them on grid view
+        FavouriteDataSource dataSource = new FavouriteDataSource(getActivity());
+
+        dataSource.open();
+        ArrayList<Movie> favoriteMovies = dataSource.getFavouriteMovies();
+        dataSource.close();
+
+        if (favoriteMovies.size() == 0){
+            Toast.makeText(getActivity(), "You don't have any favourite movies yet, mark a movie as favourite first", Toast.LENGTH_LONG).show();
+
+        }else{
+
+            CustomGridAdapter adapter = new CustomGridAdapter(getActivity(), favoriteMovies);
+
+            gridView.setAdapter(adapter);
+
+        }
+    }
+
 }
