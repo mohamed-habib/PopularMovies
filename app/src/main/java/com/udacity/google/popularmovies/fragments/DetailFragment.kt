@@ -11,12 +11,10 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.ListView
 import android.support.v7.widget.ShareActionProvider
@@ -27,7 +25,6 @@ import android.widget.ToggleButton
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
-import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
@@ -36,10 +33,8 @@ import com.udacity.google.popularmovies.R
 
 import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
 
 import java.util.ArrayList
-import java.util.Scanner
 
 class DetailFragment : Fragment() {
 
@@ -60,19 +55,19 @@ class DetailFragment : Fragment() {
         val movieTitle = rootView.findViewById<View>(R.id.movie_title) as TextView
         movieTitle.text = MainFragment.clickedMovie.title
         val moviePoster = rootView.findViewById<View>(R.id.movie_poster) as ImageView
-        Picasso.with(activity).load(MainFragment.clickedMovie.posterPath).resize(300, 300).centerInside().into(moviePoster)
-        Log.d("DetailDebug", MainFragment.clickedMovie.posterPath)
+        Picasso.with(activity).load(MainFragment.clickedMovie.poster_path).resize(300, 300).centerInside().into(moviePoster)
+        Log.d("DetailDebug", MainFragment.clickedMovie.poster_path)
         val movieDate = rootView.findViewById<View>(R.id.movie_date) as TextView
-        movieDate.text = MainFragment.clickedMovie.releaseDate
+        movieDate.text = MainFragment.clickedMovie.release_date
 
         val movieVoteAverage = rootView.findViewById<View>(R.id.movie_vote_average) as TextView
-        movieVoteAverage.text = MainFragment.clickedMovie.voteAverage
+        movieVoteAverage.text = MainFragment.clickedMovie.vote_average
 
         val movieOverView = rootView.findViewById<View>(R.id.movie_overview) as TextView
         movieOverView.text = MainFragment.clickedMovie.overview
 
         favButton.setOnCheckedChangeListener { compoundButton, b ->
-            val favouriteDataSource = FavouriteDataSource(activity)
+            val favouriteDataSource = FavouriteDataSource(activity!!)
             favouriteDataSource.open()
 
             if (favButton.text == "MARK AS A FAVOURITE") {
@@ -219,7 +214,7 @@ class DetailFragment : Fragment() {
         }
 
 
-        val favouriteDataSource = FavouriteDataSource(activity)
+        val favouriteDataSource = FavouriteDataSource(activity!!)
         favouriteDataSource.open()
         if (favouriteDataSource.isFavouriteMovie(clickedMovieId)) {
 
