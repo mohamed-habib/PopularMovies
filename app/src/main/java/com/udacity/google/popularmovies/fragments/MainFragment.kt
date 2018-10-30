@@ -24,7 +24,7 @@ import com.android.volley.toolbox.Volley
 import com.udacity.google.popularmovies.DetailActivity
 import com.udacity.google.popularmovies.util.FavouriteDataSource
 import com.udacity.google.popularmovies.util.CustomGridAdapter
-import com.udacity.google.popularmovies.util.Movie
+import com.udacity.google.popularmovies.repository.data.Movie
 import com.udacity.google.popularmovies.R
 import com.udacity.google.popularmovies.repository.remote.MoviesRepository
 import io.reactivex.android.schedulers.AndroidSchedulers

@@ -9,6 +9,7 @@ import android.widget.ImageView
 
 import com.squareup.picasso.Picasso
 import com.udacity.google.popularmovies.R
+import com.udacity.google.popularmovies.repository.data.Movie
 
 import java.util.ArrayList
 

@@ -1,4 +1,4 @@
-package com.udacity.google.popularmovies.util
+package com.udacity.google.popularmovies.repository.data
 
 /**
  * Created by Dell on 10/4/2015.

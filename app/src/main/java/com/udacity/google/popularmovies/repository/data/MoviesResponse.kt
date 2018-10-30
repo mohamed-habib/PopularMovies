@@ -1,7 +1,6 @@
-package com.udacity.google.popularmovies.repository
+package com.udacity.google.popularmovies.repository.data
 
 import com.google.gson.annotations.SerializedName
-import com.udacity.google.popularmovies.util.Movie
 
 
 data class MoviesResponse(

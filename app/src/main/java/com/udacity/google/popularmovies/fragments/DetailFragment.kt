@@ -23,13 +23,14 @@ import android.widget.Toast
 import android.widget.ToggleButton
 
 import com.android.volley.Request
-import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
 import com.udacity.google.popularmovies.util.FavouriteDataSource
 import com.udacity.google.popularmovies.R
+import com.udacity.google.popularmovies.repository.remote.MoviesRepository
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
 import org.json.JSONArray
 import org.json.JSONException
@@ -41,7 +42,6 @@ class DetailFragment : Fragment() {
     private var clickedMovieId: Int = 0
     private lateinit var reviewsLV: ListView
     private lateinit var trailersLv: ListView
-    private lateinit var queue: RequestQueue
     private lateinit var trailersNames: ArrayList<String>
     private var trailersKeys: ArrayList<String>? = null
     private var mShareActionProvider: ShareActionProvider? = null
@@ -52,8 +52,8 @@ class DetailFragment : Fragment() {
         val rootView = inflater.inflate(R.layout.detail_fragment, null, false)
         val favButton = rootView.findViewById<View>(R.id.FavtoggleButton) as ToggleButton
         clickedMovieId = MainFragment.clickedMovie.id
-        val movieTitle = rootView.findViewById<View>(R.id.movie_title) as TextView
-        movieTitle.text = MainFragment.clickedMovie.title
+        activity!!.title = MainFragment.clickedMovie.title
+
         val moviePoster = rootView.findViewById<View>(R.id.movie_poster) as ImageView
         Picasso.with(activity).load(MainFragment.clickedMovie.poster_path).resize(300, 300).centerInside().into(moviePoster)
         Log.d("DetailDebug", MainFragment.clickedMovie.poster_path)
@@ -66,12 +66,12 @@ class DetailFragment : Fragment() {
         val movieOverView = rootView.findViewById<View>(R.id.movie_overview) as TextView
         movieOverView.text = MainFragment.clickedMovie.overview
 
-        favButton.setOnCheckedChangeListener { compoundButton, b ->
+        favButton.setOnCheckedChangeListener { _, b ->
             val favouriteDataSource = FavouriteDataSource(activity!!)
             favouriteDataSource.open()
 
             if (favButton.text == "MARK AS A FAVOURITE") {
-                //                    save clicked movie id and poster link to db
+                //save clicked movie id and poster link to db
                 favouriteDataSource.create(MainFragment.clickedMovie)
                 Toast.makeText(activity, "Marked as FAVOURITE", Toast.LENGTH_LONG).show()
             } else {
@@ -91,57 +91,22 @@ class DetailFragment : Fragment() {
             false
         }
 
-
-        queue = Volley.newRequestQueue(activity!!)
-
-
         trailersNames = ArrayList()
         trailersKeys = ArrayList()
 
-        var builder = Uri.Builder()
-
-        builder.scheme("http")
-                .authority("api.themoviedb.org")
-                .appendPath("3")
-                .appendPath("movie")
-                .appendPath("" + clickedMovieId)
-                .appendPath("videos")
-                .appendQueryParameter("api_key", activity!!.resources.getString(R.string.api_key))
-
-        //http://api.themoviedb.org/3/movie/49026/videos?api_key=4f92be250f018aff8f3a2b5c3864aecd
-        var myUrl = builder.build().toString()
-
-        Log.d("VolleyDebug", myUrl)
-        val trailersRequest = JsonObjectRequest(Request.Method.GET, myUrl, null, Response.Listener { response ->
-            var resultJsonArray: JSONArray? = null
-            try {
-
-                resultJsonArray = response.getJSONArray("results")
-
-
-                for (i in 0 until resultJsonArray!!.length()) {
-
-                    val jsonObject = resultJsonArray.getJSONObject(i)
-
-                    val name = jsonObject.getString("name")
-                    val key = jsonObject.getString("key")
-
-                    trailersNames.add(name)
-                    trailersKeys!!.add(key)
+        val api_key = activity!!.resources.getString(R.string.api_key)
+        val moviesRepository = MoviesRepository()
+        moviesRepository.getTrailers(clickedMovieId, api_key).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    it.trailserList.forEach { trailer ->
+                        trailersNames.add(trailer.name)
+                        trailersKeys!!.add(trailer.key)
+                    }
                     val adapter = CustomListAdapter(activity!!, trailersNames)
-
                     trailersLv.adapter = adapter
-
-                }
-
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        },
-                Response.ErrorListener { Toast.makeText(activity, "Sorry some thing happened while retrieving trailers, please try again", Toast.LENGTH_LONG).show() }
-        )
-
-        queue.add(trailersRequest)
+                }, {
+                    Toast.makeText(activity, "Sorry some thing happened while retrieving trailers, please try again", Toast.LENGTH_LONG).show()
+                })
 
 
         trailersLv.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, i, l ->
@@ -156,55 +121,17 @@ class DetailFragment : Fragment() {
         reviewsLV = rootView.findViewById<View>(R.id.reviews_list_view) as ListView
 
         val reviewsArrayList = ArrayList<String>()
+        moviesRepository.getReviews(clickedMovieId, api_key).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    it.reviewsList.forEach { review ->
+                        reviewsArrayList.add(review.author + ": " + System.getProperty("line.separator") + System.getProperty("line.separator") + review.content)
+                        Log.d("DetailDebug", "$review.author: /r/n$review.content")
+                        val reviewsAdapter = ArrayAdapter(activity!!, android.R.layout.simple_list_item_1, reviewsArrayList)
+                        reviewsLV.adapter = reviewsAdapter
+                    }
+                }, {
 
-
-        builder = Uri.Builder()
-
-        builder.scheme("http")
-                .authority("api.themoviedb.org")
-                .appendPath("3")
-                .appendPath("movie")
-                .appendPath("" + clickedMovieId)
-                .appendPath("reviews")
-                .appendQueryParameter("api_key", activity!!.resources.getString(R.string.api_key))
-
-        //http://api.themoviedb.org/3/movie/49026/reviews?api_key=4f92be250f018aff8f3a2b5c3864aecd
-
-        myUrl = builder.build().toString()
-
-
-        val reviewsRequest = JsonObjectRequest(Request.Method.GET, myUrl, null, Response.Listener { response ->
-            try {
-                val resultsJsonArray = response.getJSONArray("results")
-
-
-                for (i in 0 until resultsJsonArray.length()) {
-
-                    val resultJsonObj = resultsJsonArray.getJSONObject(i)
-
-                    val author = resultJsonObj.getString("author")
-
-                    val content = resultJsonObj.getString("content")
-
-                    //TODO: author with content !
-                    reviewsArrayList.add(author + ": " + System.getProperty("line.separator") + System.getProperty("line.separator") + content)
-
-                    Log.d("DetailDebug", "$author: /r/n$content")
-
-                    val reviewsAdapter = ArrayAdapter(activity!!, android.R.layout.simple_list_item_1, reviewsArrayList)
-                    reviewsLV.adapter = reviewsAdapter
-
-                }
-
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        },
-                Response.ErrorListener { }
-        )
-
-        queue.add(reviewsRequest)
-
+                })
 
         reviewsLV.setOnTouchListener { v, event ->
             // Setting on Touch Listener for handling the touch inside ScrollView
