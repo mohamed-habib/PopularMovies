@@ -72,7 +72,7 @@ class DetailFragment : Fragment() {
         movieOverView.text = MainFragment.clickedMovie.overview
 
         favButton.setOnCheckedChangeListener { compoundButton, b ->
-            val favouriteDataSource = FavouriteDataSource(activity)
+            val favouriteDataSource = FavouriteDataSource(activity!!)
             favouriteDataSource.open()
 
             if (favButton.text == "MARK AS A FAVOURITE") {
@@ -219,7 +219,7 @@ class DetailFragment : Fragment() {
         }
 
 
-        val favouriteDataSource = FavouriteDataSource(activity)
+        val favouriteDataSource = FavouriteDataSource(activity!!)
         favouriteDataSource.open()
         if (favouriteDataSource.isFavouriteMovie(clickedMovieId)) {
 

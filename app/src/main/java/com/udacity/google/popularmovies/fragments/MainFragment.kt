@@ -142,7 +142,7 @@ class MainFragment : Fragment() {
                     popularMoviePosters.add(poster)
                     Log.d(TAG, popularMoviePosters[i])
                 }
-                adapter = CustomGridAdapter(activity, popularMovies)
+                adapter = CustomGridAdapter(activity!!, popularMovies)
                 gridView.adapter = adapter
             } catch (e: JSONException) {
                 e.printStackTrace()
@@ -190,7 +190,7 @@ class MainFragment : Fragment() {
 
     private fun getFavouriteFromDB() {
         //retrieve movies from db and show them on grid view
-        val dataSource = FavouriteDataSource(activity)
+        val dataSource = FavouriteDataSource(activity!!)
         dataSource.open()
         val favoriteMovies = dataSource.favouriteMovies
         dataSource.close()
@@ -198,7 +198,7 @@ class MainFragment : Fragment() {
         if (favoriteMovies.size == 0) {
             Toast.makeText(activity, "You don't have any favourite movies yet, mark a movie as favourite first", Toast.LENGTH_LONG).show()
         } else {
-            val adapter = CustomGridAdapter(activity, favoriteMovies)
+            val adapter = CustomGridAdapter(activity!!, favoriteMovies)
             gridView.adapter = adapter
         }
     }
