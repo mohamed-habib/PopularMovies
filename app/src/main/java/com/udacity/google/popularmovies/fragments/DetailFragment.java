@@ -70,26 +70,26 @@ public class DetailFragment extends Fragment {
         final ToggleButton favButton = (ToggleButton) rootView.findViewById(R.id.FavtoggleButton);
         //MainFragment.clickedMovie
 
-        clickedMovieId = MainFragment.clickedMovie.getId();
+        clickedMovieId = MainFragment.Companion.getClickedMovie().getId();
 
         TextView movieTitle = (TextView) rootView.findViewById(R.id.movie_title);
-        movieTitle.setText(MainFragment.clickedMovie.getTitle());
+        movieTitle.setText(MainFragment.Companion.getClickedMovie().getTitle());
 
         ImageView moviePoster = (ImageView) rootView.findViewById(R.id.movie_poster);
-        Picasso.with(getActivity()).load(MainFragment.clickedMovie.getPosterPath()).resize(300, 300).centerInside().into(moviePoster);
+        Picasso.with(getActivity()).load(MainFragment.Companion.getClickedMovie().getPosterPath()).resize(300, 300).centerInside().into(moviePoster);
 
 
-        Log.d("DetailDebug", MainFragment.clickedMovie.getPosterPath());
+        Log.d("DetailDebug", MainFragment.Companion.getClickedMovie().getPosterPath());
 
         TextView movieDate = (TextView) rootView.findViewById(R.id.movie_date);
-        movieDate.setText(MainFragment.clickedMovie.getReleaseDate());
+        movieDate.setText(MainFragment.Companion.getClickedMovie().getReleaseDate());
 
         TextView movieVoteAverage = (TextView) rootView.findViewById(R.id.movie_vote_average);
-        movieVoteAverage.setText(MainFragment.clickedMovie.getVoteAverage());
+        movieVoteAverage.setText(MainFragment.Companion.getClickedMovie().getVoteAverage());
 
 
         TextView movieOverView = (TextView) rootView.findViewById(R.id.movie_overview);
-        movieOverView.setText(MainFragment.clickedMovie.getOverview());
+        movieOverView.setText(MainFragment.Companion.getClickedMovie().getOverview());
 
 
         favButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -101,11 +101,11 @@ public class DetailFragment extends Fragment {
                 if (favButton.getText().equals("MARK AS A FAVOURITE")) {
 
 //                    save clicked movie id and poster link to db
-                    favouriteDataSource.create(MainFragment.clickedMovie);
+                    favouriteDataSource.create(MainFragment.Companion.getClickedMovie());
                     Toast.makeText(getActivity(), "Marked as FAVOURITE", Toast.LENGTH_LONG).show();
                 } else {
 
-                    favouriteDataSource.delete(MainFragment.clickedMovie.getId());
+                    favouriteDataSource.delete(MainFragment.Companion.getClickedMovie().getId());
                     Toast.makeText(getActivity(), "Marked as not favourite", Toast.LENGTH_LONG).show();
                 }
 
