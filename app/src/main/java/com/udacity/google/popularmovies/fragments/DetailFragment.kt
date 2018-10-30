@@ -40,7 +40,7 @@ import java.util.ArrayList
 class DetailFragment : Fragment() {
 
     private var clickedMovieId: Int = 0
-    private lateinit var reviewsLV: ListView
+    private lateinit var reviewTV: TextView
     private lateinit var trailersLv: ListView
     private lateinit var trailersNames: ArrayList<String>
     private var trailersKeys: ArrayList<String>? = null
@@ -118,28 +118,22 @@ class DetailFragment : Fragment() {
             startActivity(intent)
         }
 
-        reviewsLV = rootView.findViewById<View>(R.id.reviews_list_view) as ListView
+        reviewTV = rootView.findViewById<View>(R.id.reviews_text_view) as TextView
 
-        val reviewsArrayList = ArrayList<String>()
+//        val reviewsArrayList = ArrayList<String>()
+        var reviewStr = ""
         moviesRepository.getReviews(clickedMovieId, api_key).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     it.reviewsList.forEach { review ->
-                        reviewsArrayList.add(review.author + ": " + System.getProperty("line.separator") + System.getProperty("line.separator") + review.content)
+                        reviewStr += review.author + ": " + System.getProperty("line.separator") + System.getProperty("line.separator") + review.content + System.getProperty("line.separator") + System.getProperty("line.separator")
                         Log.d("DetailDebug", "$review.author: /r/n$review.content")
-                        val reviewsAdapter = ArrayAdapter(activity!!, android.R.layout.simple_list_item_1, reviewsArrayList)
-                        reviewsLV.adapter = reviewsAdapter
                     }
+
+                    reviewTV.setText(reviewStr)
+
                 }, {
 
                 })
-
-        reviewsLV.setOnTouchListener { v, event ->
-            // Setting on Touch Listener for handling the touch inside ScrollView
-            // Disallow the touch request for parent scroll on touch of child view
-            v.parent.requestDisallowInterceptTouchEvent(true)
-            false
-        }
-
 
         val favouriteDataSource = FavouriteDataSource(activity!!)
         favouriteDataSource.open()
