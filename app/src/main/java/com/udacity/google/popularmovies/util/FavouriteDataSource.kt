@@ -2,14 +2,8 @@ package com.udacity.google.popularmovies.util
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.net.Uri
-import android.view.View
-import android.widget.Toast
-
-import com.udacity.google.popularmovies.MainActivity
 
 import java.util.ArrayList
 
@@ -28,19 +22,20 @@ class FavouriteDataSource(context: Context) {
             if (cursor.count > 0) {
                 while (cursor.moveToNext()) {
 
-                    val movie = Movie()
-                    movie.id = cursor.getInt(cursor
+                    val movie = Movie(cursor.getInt(cursor
                             .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_ID))
-                    movie.posterPath = cursor.getString(cursor
+                            , cursor.getString(cursor
                             .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_POSTER))
-                    movie.releaseDate = cursor.getString(cursor
+                            , cursor.getString(cursor
                             .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_RELEASE_DATE))
-                    movie.overview = cursor.getString(cursor
+                            , cursor.getString(cursor
                             .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_OVERVIEW))
-                    movie.title = cursor.getString(cursor
+                            , cursor.getString(cursor
                             .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_TITLE))
-                    movie.voteAverage = cursor.getString(cursor
+                            , cursor.getString(cursor
                             .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_VOTE_AVERAGE))
+
+                    )
 
 
                     movies.add(movie)
@@ -64,11 +59,11 @@ class FavouriteDataSource(context: Context) {
         val contentValues = ContentValues()
 
         contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_ID, movie.id)
-        contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_POSTER, movie.posterPath)
+        contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_POSTER, movie.poster_path)
         contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_OVERVIEW, movie.overview)
-        contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_RELEASE_DATE, movie.releaseDate)
+        contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_RELEASE_DATE, movie.release_date)
         contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_TITLE, movie.title)
-        contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_VOTE_AVERAGE, movie.voteAverage)
+        contentValues.put(FavouriteOpenHelper.COLUMN_MOVIE_VOTE_AVERAGE, movie.vote_average)
 
         val values = ContentValues()
         values.put(FavouriteContract.FavouriteEntry.COLUMN_MOVIE_ID, "1")

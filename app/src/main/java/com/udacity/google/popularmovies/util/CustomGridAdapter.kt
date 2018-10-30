@@ -2,7 +2,6 @@ package com.udacity.google.popularmovies.util
 
 import android.app.Activity
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -43,7 +42,7 @@ class CustomGridAdapter(//ArrayList<String> images ;
 
         imageView.tag = movie
 
-        val url = movie!!.posterPath
+        val url = movie!!.poster_path
 
         Log.d("PicassoDebug", position.toString() + " " + url)
         Picasso.with(context).load(url).resize(500, 500).centerInside().into(imageView)
