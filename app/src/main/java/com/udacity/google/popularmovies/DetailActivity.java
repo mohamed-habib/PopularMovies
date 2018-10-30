@@ -1,20 +1,12 @@
 package com.udacity.google.popularmovies;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.content.Intent;
-import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Toast;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 
 import com.udacity.google.popularmovies.fragments.DetailFragment;
-import com.udacity.google.popularmovies.util.Movie;
 
-public class DetailActivity extends ActionBarActivity {
+public class DetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

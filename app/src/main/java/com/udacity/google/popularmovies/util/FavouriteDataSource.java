@@ -17,15 +17,14 @@ import java.util.ArrayList;
  * Created by Dell on 10/9/2015.
  */
 public class FavouriteDataSource {
-
-
     SQLiteOpenHelper openHelper;
     public static SQLiteDatabase database;
 
-   public FavouriteDataSource(Context context){
+    public FavouriteDataSource(Context context) {
         openHelper = new FavouriteOpenHelper(context);
     }
-    public void open(){
+
+    public void open() {
 
         database = openHelper.getWritableDatabase();
     }
@@ -35,7 +34,7 @@ public class FavouriteDataSource {
     }
 
 
-    public void create(Movie movie){
+    public void create(Movie movie) {
 
         ContentValues contentValues = new ContentValues();
 
@@ -54,51 +53,51 @@ public class FavouriteDataSource {
 
     }
 
-    public void delete(int movieID){
+    public void delete(int movieID) {
         String whereClause = FavouriteOpenHelper.COLUMN_MOVIE_ID + " = " + movieID;
 
         database.delete(FavouriteOpenHelper.TABLE_FAVOURITE, whereClause, null);
     }
 
-    public ArrayList<Movie> getFavouriteMovies(){
-
+    public ArrayList<Movie> getFavouriteMovies() {
 
 
         ArrayList<Movie> movies = new ArrayList<Movie>();
 
-        Cursor cursor  = database.query(FavouriteOpenHelper.TABLE_FAVOURITE, FavouriteOpenHelper.ALL_COLUMNS, null, null, null, null, null);
+        Cursor cursor = database.query(FavouriteOpenHelper.TABLE_FAVOURITE, FavouriteOpenHelper.ALL_COLUMNS, null, null, null, null, null);
 
         if (cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
 
-                    Movie movie = new Movie();
-                    movie.setId(cursor.getInt(cursor
-                            .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_ID)));
-                    movie.setPosterPath(cursor.getString(cursor
-                            .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_POSTER)));
-                    movie.setReleaseDate(cursor.getString(cursor
-                            .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_RELEASE_DATE))); ;
-                    movie.setOverview(cursor.getString(cursor
-                            .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_OVERVIEW)));
-                    movie.setTitle(cursor.getString(cursor
-                            .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_TITLE)));
-                    movie.setVoteAverage(cursor.getString(cursor
-                            .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_VOTE_AVERAGE)));
+                Movie movie = new Movie();
+                movie.setId(cursor.getInt(cursor
+                        .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_ID)));
+                movie.setPosterPath(cursor.getString(cursor
+                        .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_POSTER)));
+                movie.setReleaseDate(cursor.getString(cursor
+                        .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_RELEASE_DATE)));
+                ;
+                movie.setOverview(cursor.getString(cursor
+                        .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_OVERVIEW)));
+                movie.setTitle(cursor.getString(cursor
+                        .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_TITLE)));
+                movie.setVoteAverage(cursor.getString(cursor
+                        .getColumnIndex(FavouriteOpenHelper.COLUMN_MOVIE_VOTE_AVERAGE)));
 
 
-                    movies.add(movie);
-                }
+                movies.add(movie);
             }
-        return movies;
         }
+        return movies;
+    }
 
-    public boolean isFavouriteMovie(int movieId){
+    public boolean isFavouriteMovie(int movieId) {
 
         String selection = FavouriteOpenHelper.COLUMN_MOVIE_ID + "=" + movieId;
 
         Cursor cursor = database.query(FavouriteOpenHelper.TABLE_FAVOURITE, FavouriteOpenHelper.ALL_COLUMNS, selection, null, null, null, null);
 
-        if (cursor.getCount() > 0 )
+        if (cursor.getCount() > 0)
             return true;
         else
             return false;
